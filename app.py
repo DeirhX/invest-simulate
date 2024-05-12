@@ -1,8 +1,11 @@
 import streamlit as st
 import gspread
 from streamlit_gsheets import GSheetsConnection
+from menu import menu
+from data import get_investments
+from compute import wealth_in_currency
 
-st.title('Investment Simulator')
+st.title('Investiční simulátor')
 
 # gc = gspread.service_account()
 # ss = gc.list_spreadsheet_files()
@@ -10,16 +13,19 @@ st.title('Investment Simulator')
 
 # st.caption(sh.sheet1.get('A1'))
 
-conn = st.connection("gsheets", type=GSheetsConnection)
-assets = conn.read(worksheet='Overview')
-stocks = conn.read(worksheet='Stocks')
-currency = conn.read(worksheet='Currencies')
+menu()
 
-# Keep only the first three columns
-assets = assets.iloc[:, :2]
-stocks = stocks.iloc[:, :3]
-currency = currency.iloc[:, :3]
+data = get_investments()
 
-st.dataframe(assets)
-st.dataframe(stocks)
-st.dataframe(currency)
+st.markdown('Aktuální majetek')
+st.dataframe(data.assets, hide_index=True,
+             column_order=['Asset', 'Amount'], 
+             column_config={'Asset': st.column_config.TextColumn("Instrument"),
+                            'Amount': st.column_config.NumberColumn("Množství", format="%.2f")})
+col1, col2 = st.columns([1, 2])
+with col1:
+    base_currency = st.selectbox('Přepočet na', data.assets.index, key='base_currency')
+st.markdown(f'Aktuální hodnota: {wealth_in_currency(data, base_currency):.2f} {base_currency}')
+
+st.dataframe(data.stocks)
+st.dataframe(data.currencies)
