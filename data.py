@@ -7,6 +7,9 @@ class InvestData:
         self.stocks = stocks
         self.currencies = currencies
         
+    def hash_func(obj):
+        return hash(hash(obj.assets.to_string()) + hash(obj.stocks.to_string()) + hash(obj.currencies.to_string()))
+
 def get_investments():
     conn = st.connection("gsheets", type=GSheetsConnection)
 

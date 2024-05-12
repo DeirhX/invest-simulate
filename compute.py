@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from data import InvestData
 
+@st.cache_data(ttl=300, hash_funcs={InvestData: InvestData.hash_func})
 def wealth_in_currency(data : InvestData, currency : str):
     # Join assets with stock prices and sum amount * price
     joined = data.assets.join(data.stocks, how='left')
@@ -21,3 +22,10 @@ def wealth_in_currency(data : InvestData, currency : str):
     final_amount = conversions['Converted Value'].sum() + values[values.index == currency]['Value'].sum()
     return final_amount
     
+@st.cache_data(ttl=300, hash_funcs={InvestData: InvestData.hash_func})
+def assets_with_prices(data : InvestData):
+    joined = data.assets.join(data.stocks, how='left')
+    joined['Currency'] = joined['Currency'].fillna(joined.index.to_series())
+    joined['Price'] = joined['Price'].fillna(1)
+    joined['Value'] = joined['Amount'] * joined['Price']
+    return joined
