@@ -14,7 +14,6 @@ st.title('Investiční simulátor')
 # st.caption(sh.sheet1.get('A1'))
 
 menu()
-
 data = get_investments()
 
 st.markdown('Aktuální majetek')
@@ -27,8 +26,5 @@ st.dataframe(compute.assets_with_prices(data), hide_index=True,
                             'Value': st.column_config.NumberColumn("Hodnota", format="%.2f")})
 col1, col2 = st.columns([1, 2])
 with col1:
-    base_currency = st.selectbox('Přepočet na', data.assets.index, key='base_currency')
+    base_currency = st.selectbox('Přepočet na', ['USD', 'CZK', 'EUR'], key='base_currency')
 st.markdown(f'Aktuální hodnota: {compute.wealth_in_currency(data, base_currency):.2f} {base_currency}')
-
-st.dataframe(data.stocks)
-st.dataframe(data.currencies)

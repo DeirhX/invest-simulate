@@ -11,6 +11,11 @@ class InvestData:
         return hash(hash(obj.assets.to_string()) + hash(obj.stocks.to_string()) + hash(obj.currencies.to_string()))
 
 def get_investments():
+    if 'data' not in st.session_state:
+        st.session_state.data = load_investments()
+    return st.session_state.data
+
+def load_investments():
     conn = st.connection("gsheets", type=GSheetsConnection)
 
     assets = conn.read(worksheet='Overview')
