@@ -17,7 +17,7 @@ menu()
 data = get_investments()
 
 st.markdown('Aktuální majetek')
-st.dataframe(compute.assets_with_prices(data), hide_index=True,
+st.dataframe(compute.assets_with_prices(data.get_assets()), hide_index=True,
              column_order=['Asset', 'Amount', 'Price', 'Currency', 'Value'], 
              column_config={'Asset': st.column_config.TextColumn("Instrument"),
                             'Amount': st.column_config.NumberColumn("Množství", format="%.2f"),
