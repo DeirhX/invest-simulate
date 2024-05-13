@@ -5,7 +5,7 @@ from data import InvestData
 @st.cache_data(ttl=300, hash_funcs={InvestData: InvestData.hash_func})
 def wealth_in_currency(data : InvestData, currency : str):
     # Join assets with stock prices and sum amount * price
-    joined = data.assets.join(data.stocks, how='left')
+    joined = data.get_assets().join(data.stocks, how='left')
     # For assets with no currency, set it to its own name
     joined['Currency'] = joined['Currency'].fillna(joined.index.to_series())
     joined['Price'] = joined['Price'].fillna(1)
@@ -24,8 +24,8 @@ def wealth_in_currency(data : InvestData, currency : str):
     
 @st.cache_data(ttl=300, hash_funcs={InvestData: InvestData.hash_func})
 def assets_with_prices(data : InvestData):
-    joined = data.assets.join(data.stocks, how='left')
+    joined = data.get_assets().join(data.stocks, how='left')
     joined['Currency'] = joined['Currency'].fillna(joined.index.to_series())
     joined['Price'] = joined['Price'].fillna(1)
     joined['Value'] = joined['Amount'] * joined['Price']
-    return joined
+    return joined[joined['Currency'] != 'FUND']
