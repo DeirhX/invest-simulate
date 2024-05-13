@@ -20,6 +20,12 @@ class InvestData:
         gain_loss['Current'] = gain_loss['Amount'] - gain_loss['Proceeds']
         return gain_loss['Current'].to_frame().rename(columns={'Current': 'Amount'})
 
+    def get_currency_names(self):
+        return self.currencies['From'].unique().to_list()
+    
+    def get_asset_names(self):
+        return self.stocks.index.to_list()
+
 def get_investments():
     if 'data' not in st.session_state:
         st.session_state.data = load_investments()

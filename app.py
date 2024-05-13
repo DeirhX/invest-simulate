@@ -1,6 +1,7 @@
 import streamlit as st
 from menu import menu
 from data import get_investments
+from ux import show_assets_dataframe
 import compute
 
 st.title('Investiční simulátor')
@@ -9,13 +10,7 @@ menu()
 data = get_investments()
 
 st.markdown('Aktuální majetek')
-st.dataframe(compute.assets_with_prices(data), hide_index=False,
-             column_order=['Asset', 'Amount', 'Price', 'Currency', 'Value'], 
-             column_config={'Asset': st.column_config.TextColumn("Instrument"),
-                            'Amount': st.column_config.NumberColumn("Množství", format="%.2f"),
-                            'Price': st.column_config.NumberColumn("Aktuální cena", format="%.2f"),
-                            'Currency': st.column_config.TextColumn("Měna"),
-                            'Value': st.column_config.NumberColumn("Hodnota", format="%.2f")})
+show_assets_dataframe(compute.assets_with_prices(data))
 col1, col2 = st.columns([1, 2])
 with col1:
     base_currency = st.selectbox('Přepočet na', ['USD', 'CZK', 'EUR'], key='base_currency')
