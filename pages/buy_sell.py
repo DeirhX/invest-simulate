@@ -17,7 +17,7 @@ with st.container():
     with col1:
         asset = st.selectbox('Akcie', investments.get_asset_names())
     with col2:
-        amount = st.number_input('Množství', value=1)
+        amount = st.number_input('Množství', value=1.0, key='amount', step=1.0, format="%.2f")
     cost = amount * investments.stocks.loc[asset, "Price"]
     currency = investments.stocks.loc[asset, "Currency"]
     if amount == 0:
@@ -25,8 +25,10 @@ with st.container():
     elif amount > 0:
         caption.markdown('Nákup')
         st.markdown(f'Nákup: :green[{amount:.2f} {asset}] za :red[{cost:.2f} {currency}] při kurzu :blue[{investments.stocks.loc[asset, "Price"]:.2f} {currency}] za kus')
-        if currency not in investments.get_assets().index or investments.get_assets().loc[currency, 'Amount'] < cost:
+        if currency not in investments.get_assets().index:
             st.error('Nemáte dostatek peněz na nákup')
+        elif cost > investments.get_assets().loc[currency, 'Amount']:
+            st.error(f'Nemáte dostatek peněz na nákup, maximum lze nakoupit :green[{investments.get_assets().loc[currency, "Amount"]/investments.stocks.loc[asset, "Price"]:.2f} {asset}]')
         else: 
             if st.button('Potvrdit nákup'):
                 with st.spinner('Probíhá nákup...'):
@@ -37,15 +39,15 @@ with st.container():
     else: # amount < 0
         caption.markdown('Prodej')
         st.markdown(f'Prodej: :red[{-amount:.2f} {asset}] za :green[{-cost:.2f} {currency}] při kurzu :blue[{investments.stocks.loc[asset, "Price"]:.2f} {currency}] za kus')
-        if asset not in investments.get_assets().index or investments.get_assets().loc[asset, 'Amount'] < -amount:
+        if asset not in investments.get_assets().index:
             st.error('Nemáte dostatek akcií k prodeji')
+        elif investments.get_assets().loc[asset, 'Amount'] < -amount:
+            st.error(f'Nemáte dostatek akcií k prodeji, maximum je :red[{investments.get_assets().loc[asset, "Amount"]:.2f} {asset}]')
         else: 
             if st.button('Potvrdit prodej'):
                 with st.spinner('Probíhá prodej...'):
                     data = investments.buy(asset, amount, currency)
-                    st.progress(0.2)
                     investments.save()
-                    st.progress(1.0)
                     st.success('Prodej proběhl úspěšně')
                     asset_view.dataframe(compute.assets_with_prices(investments), column_order=ux.get_show_assets_config()['column_order'], column_config=ux.get_show_assets_config()['column_config'])
             
@@ -53,4 +55,4 @@ with st.container():
 # Make some space
 st.write('')
 st.caption('Historie obchodů')
-ux.show_trades_dataframe(investments.trades)
+ux.show_trades_dataframe(investments.get_trades())

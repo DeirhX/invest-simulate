@@ -8,4 +8,4 @@ st.subheader('Historie obchodů')
 menu()
 
 data = get_investments()
-ux.show_trades_dataframe(data.trades)
+ux.show_trades_dataframe(data.get_trades())
