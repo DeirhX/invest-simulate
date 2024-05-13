@@ -7,7 +7,9 @@ import compute
 st.title('Investiční simulátor')
 
 menu()
-data = get_investments()
+
+data = st.session_state.get('data', None) or get_investments()
+st.session_state.data = data
 
 st.markdown('Aktuální majetek')
 show_assets_dataframe(compute.assets_with_prices(data))

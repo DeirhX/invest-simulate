@@ -8,7 +8,9 @@ st.set_page_config(page_title='Nákup akcií', layout='centered')
 st.subheader('Nákup / prodej akcií')
 menu() 
 
-investments = get_investments()
+investments = st.session_state.get('data', None) or get_investments()
+st.session_state.data = investments
+
 asset_view = ux.show_assets_dataframe(compute.assets_with_prices(investments))
 
 with st.container():
@@ -34,6 +36,7 @@ with st.container():
                 with st.spinner('Probíhá nákup...'):
                     data = investments.buy(asset, amount, currency)
                     investments.save()
+                    st.cache_data.clear()
                     st.success('Nákup proběhl úspěšně')
                     asset_view.dataframe(compute.assets_with_prices(investments), column_order=ux.get_show_assets_config()['column_order'], column_config=ux.get_show_assets_config()['column_config'])
     else: # amount < 0
@@ -48,9 +51,11 @@ with st.container():
                 with st.spinner('Probíhá prodej...'):
                     data = investments.buy(asset, amount, currency)
                     investments.save()
+                    st.cache_data.clear()
                     st.success('Prodej proběhl úspěšně')
                     asset_view.dataframe(compute.assets_with_prices(investments), column_order=ux.get_show_assets_config()['column_order'], column_config=ux.get_show_assets_config()['column_config'])
-            
+
+st.session_state.data = investments            
             
 # Make some space
 st.write('')
