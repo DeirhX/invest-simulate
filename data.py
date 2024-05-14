@@ -24,7 +24,7 @@ class InvestData:
         # Join gains and losses into one DataFrame
         gain_loss = gains.join(losses, how='outer').fillna(0)
         gain_loss['Current'] = gain_loss['Amount'] - gain_loss['Proceeds']
-        return gain_loss['Current'].to_frame().rename(columns={'Current': 'Amount'})
+        return gain_loss[gain_loss['Current'] != 0]['Current'].to_frame().rename(columns={'Current': 'Amount'})
 
     def get_currency_names(self):
         return self.currencies['From'].unique().to_list()
@@ -69,7 +69,7 @@ def load_investments():
     
     trades = conn.read(worksheet='Trades')
     trades = trades.iloc[:, :6].dropna()
-    trades['Time'] = pd.to_datetime(trades['Time'])
+    trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
     progress.progress(1.0, text='Hotovo')
     progress.empty()
     
