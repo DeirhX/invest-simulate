@@ -7,5 +7,7 @@ st.set_page_config(page_title='Historie', layout='centered')
 st.subheader('Historie obchodů')
 menu()
 
-data = get_investments()
+data = st.session_state.get('data', None) or get_investments()
+st.session_state.data = data
+
 ux.show_trades_dataframe(data.get_trades())

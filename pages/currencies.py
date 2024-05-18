@@ -6,7 +6,9 @@ st.set_page_config(page_title='Kurzy měn', layout='centered')
 st.subheader('Aktuální kurzy měn')
 menu() 
 
-data = get_investments()
+data = st.session_state.get('data', None) or get_investments()
+st.session_state.data = data
+
 st.dataframe(data.currencies.sort_values(by='From') , hide_index=True,
              column_order=['From', 'Price', 'To'], 
              column_config={'From': st.column_config.TextColumn("Za"),

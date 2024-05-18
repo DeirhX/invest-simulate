@@ -6,7 +6,9 @@ st.set_page_config(page_title='Ceny akcií', layout='centered')
 st.subheader('Aktuální ceny akcií')
 menu()
 
-data = get_investments()
+data = st.session_state.get('data', None) or get_investments()
+st.session_state.data = data
+
 st.dataframe(data.stocks, hide_index=False, 
              column_order=['Ticker', 'Currency', 'Price'], 
              column_config={'Ticker': st.column_config.TextColumn("Kód"),
