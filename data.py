@@ -18,7 +18,7 @@ class StoredData:
         progress.progress(0.6, text=text)
         
         currencies = conn.read(worksheet='Currencies')
-        currencies = currencies.iloc[:, :4].set_index('FromTo').dropna()
+        currencies = currencies.iloc[:, :4].set_index('ToFrom').dropna()
         progress.progress(0.8, text=text)
         
         trades = conn.read(worksheet='Trades')
@@ -106,12 +106,18 @@ class Investments:
         return self.stocks.index.to_list()
     
     def buy(self, asset, amount, currency):
+        # Try to find price first in stocks, then in currencies
+        if asset in self.stocks.index:
+            price = self.stocks.loc[asset, 'Price']
+        else:
+            price = self.currencies.loc[(self.currencies['From'] == currency) & (self.currencies['To'] == asset), 'Price'].values[0]
+        
         new_trade = pd.DataFrame({'Time': pd.Timestamp.now(),
                       'Asset': asset,
                       'Amount': amount,
                       'Currency': currency,
-                      'Price': self.stocks.loc[asset, 'Price'],
-                      'Proceeds': amount * self.stocks.loc[asset, 'Price']}, index=[0])
+                      'Price': price,
+                      'Proceeds': amount * price}, index=[0])
         self._trades = self.stored_data.add_trade(new_trade)
         self.assets = None
     

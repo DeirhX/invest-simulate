@@ -14,9 +14,9 @@ def wealth_in_currency(data : Investments, currency : str):
     values = joined.groupby('Currency')['Value'].sum().to_frame()
    
     # Join with currency conversion, matching the currency index with the From column
-    conversions = values.merge(data.currencies, left_on='Currency', right_on='From', how='inner')
+    conversions = values.merge(data.currencies, left_on='Currency', right_on='To', how='inner')
     # Filter to only the currency we want to convert to. Note we ignore rows where the currency is the same as the target currency
-    conversions = conversions[conversions['To'] == currency]
+    conversions = conversions[conversions['From'] == currency]
     conversions['Converted Value'] = conversions['Value'] * conversions['Price']
     
     final_amount = conversions['Converted Value'].sum() + values[values.index == currency]['Value'].sum()
