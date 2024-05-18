@@ -70,7 +70,28 @@ class Investments:
         # Join gains and losses into one DataFrame
         gain_loss = gains.join(losses, how='outer').fillna(0)
         gain_loss['Current'] = gain_loss['Amount'] - gain_loss['Proceeds']
-        return gain_loss[gain_loss['Current'] != 0]['Current'].to_frame().rename(columns={'Current': 'Amount'})
+        self.assets = gain_loss[gain_loss['Current'] != 0]['Current'].to_frame().rename(columns={'Current': 'Amount'})
+        
+        # Now find average purchase price for each asset
+        purchases = self._trades[self._trades['Amount'] > 0]
+        # For each asset, walk from newest to oldest trades and select enough of them to cover the currently owned amount
+        # If the last purchase exceeds the amount, treat it as a partial purchase
+        # Next, do a weighted average of the prices
+        for asset in self.assets.index:
+            asset_trades = purchases[purchases['Asset'] == asset].sort_values(by='Time', ascending=False)
+            amount = self.assets.loc[asset, 'Amount']
+            price = 0
+            for i, row in asset_trades.iterrows():
+                if amount <= 0:
+                    break
+                if row['Amount'] >= amount:
+                    price += amount * row['Price']
+                    break
+                price += row['Amount'] * row['Price']
+                amount -= row['Amount']
+            self.assets.loc[asset, 'Average Price'] = price / self.assets.loc[asset, 'Amount']
+        self.assets['% Profit'] = (self.stocks['Price'] - self.assets['Average Price']) / self.assets['Average Price'] * 100
+        return self.assets
 
     def get_currency_names(self):
         return self.currencies['From'].unique().to_list()
