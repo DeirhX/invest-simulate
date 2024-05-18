@@ -13,33 +13,38 @@ class StoredData:
         conn = st.connection("gsheets", type=GSheetsConnection)
         progress.progress(0.2, text=text)
 
-        sheet = conn.read(worksheet='Honzik')
-
-        trades = sheet.iloc[:, :6].dropna()
-        trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
-        progress.progress(0.3, text=text)
-
-        stock_prices = sheet.iloc[:, 7:10].set_index('Ticker').dropna().rename(columns={'T.Price': 'Price', 'T.Currency': 'Currency'})
+        stock_prices = conn.read(worksheet='Stocks')
+        stock_prices = stock_prices.iloc[:, :3].set_index('Ticker').dropna()
         progress.progress(0.6, text=text)
-
-        currencies = sheet.iloc[:, 11:15].set_index('FromTo').dropna().rename(columns={'C.Price': 'Price'})
-
-        sheet = pd.concat([trades.reset_index(), pd.DataFrame(columns=['S.Spacer']), stock_prices.reset_index(), pd.DataFrame(columns=['C.Spacer']), currencies.reset_index()], axis=1)
-        conn.update(data=sheet, worksheet='Honzik')
         
+        currencies = conn.read(worksheet='Currencies')
+        currencies = currencies.iloc[:, :4].set_index('FromTo').dropna()
+        progress.progress(0.8, text=text)
+        
+        trades = conn.read(worksheet='Trades')
+        trades = trades.iloc[:, :6].dropna()
+        trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
         progress.progress(1.0, text='Hotovo')
         progress.empty()
-        
+      
         return StoredData(trades, stock_prices, currencies)
     
-    def save_to_sheets(self):
-        # Merge all data into one DataFrame
-        sheet = pd.concat([self.trades.reset_index(), pd.DataFrame(columns=['S.Spacer']), self.stocks.reset_index(), pd.DataFrame(columns=['C.Spacer']), self.currencies.reset_index()], axis=1)
+    @staticmethod
+    def load_trades():
         conn = st.connection("gsheets", type=GSheetsConnection)
-        conn.update(data=sheet, worksheet='Honzik')
+        trades = conn.read(worksheet='Trades')
+        trades = trades.iloc[:, :6].dropna()
+        trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
+        return trades
     
-    def update_trades(self, trades):
-        self.save_to_sheets()
+    def add_trade(self, trade):
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        st.cache_data.clear()
+        prev_trades = StoredData.load_trades()
+        # Merge trades with current trades, keeping all unique rows
+        trades = pd.concat([prev_trades, trade])
+        conn.update(data=trades, worksheet='Trades')
+        return trades
 
 
 class Investments:
@@ -74,14 +79,20 @@ class Investments:
         return self.stocks.index.to_list()
     
     def buy(self, asset, amount, currency):
-        self._trades = self._trades.append({'Time': pd.Timestamp.now(), 'Asset': asset, 'Amount': amount, 'Currency': currency, 'Price': self.stocks.loc[asset, 'Price'], 'Proceeds': amount * self.stocks.loc[asset, 'Price']}, ignore_index=True)
+        new_trade = pd.DataFrame({'Time': pd.Timestamp.now(),
+                      'Asset': asset,
+                      'Amount': amount,
+                      'Currency': currency,
+                      'Price': self.stocks.loc[asset, 'Price'],
+                      'Proceeds': amount * self.stocks.loc[asset, 'Price']}, index=[0])
+        self._trades = self.stored_data.add_trade(new_trade)
         self.assets = None
     
     def sell(self, asset, amount, currency):
         self.buy(asset, -amount, currency)
     
     def save(self):
-        self.stored_data.update_trades(self._trades)
+        pass
 
 def get_investments():
     if 'data' not in st.session_state:
