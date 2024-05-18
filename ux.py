@@ -28,3 +28,12 @@ def show_trades_dataframe(trades: pd.DataFrame):
                     'Proceeds': st.column_config.NumberColumn("Celková cena", format="%.2f"),
                     'Price': st.column_config.NumberColumn("Cena za kus", format="%.2f"),
                     })
+    
+    
+def show_funds_dataframe(assets: pd.DataFrame, **kwargs):
+    return st.dataframe(assets, hide_index=False, **kwargs,
+             column_order=['Asset', 'Amount'], 
+             column_config={
+                    'Asset': st.column_config.TextColumn("Měna"),
+                    'Amount': st.column_config.NumberColumn("Množství", format="%.2f"),
+                    })

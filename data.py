@@ -94,7 +94,13 @@ class Investments:
         return self.assets
 
     def get_currency_names(self):
-        return self.currencies['From'].unique().to_list()
+        return self.currencies['From'].unique()
+    
+    def get_exchangable_currencies(self, currency):
+        return self.currencies[self.currencies['From'] == currency]['To'].to_list()
+    
+    def get_exchange_rate(self, source, target):
+        return self.currencies[(self.currencies['From'] == source) & (self.currencies['To'] == target)]['Price'].values[0]
     
     def get_asset_names(self):
         return self.stocks.index.to_list()
