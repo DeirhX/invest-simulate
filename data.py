@@ -2,18 +2,59 @@ import streamlit as st
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
-class InvestData:
-    def __init__(self, assets, stocks, currencies, trades):
-        self.assets = None
+class StoredData:
+    def __init__(self, trades, stocks, currencies):
+        self.trades = trades
         self.stocks = stocks
         self.currencies = currencies
-        self._trades = trades
+        
+    @staticmethod
+    def load_from_sheets(progress, text):
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        progress.progress(0.2, text=text)
+
+        sheet = conn.read(worksheet='Honzik')
+
+        trades = sheet.iloc[:, :6].dropna()
+        trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
+        progress.progress(0.3, text=text)
+
+        stock_prices = sheet.iloc[:, 7:10].set_index('Ticker').dropna().rename(columns={'T.Price': 'Price', 'T.Currency': 'Currency'})
+        progress.progress(0.6, text=text)
+
+        currencies = sheet.iloc[:, 11:15].set_index('FromTo').dropna().rename(columns={'C.Price': 'Price'})
+
+        sheet = pd.concat([trades.reset_index(), pd.DataFrame(columns=['S.Spacer']), stock_prices.reset_index(), pd.DataFrame(columns=['C.Spacer']), currencies.reset_index()], axis=1)
+        conn.update(data=sheet, worksheet='Honzik')
+        
+        progress.progress(1.0, text='Hotovo')
+        progress.empty()
+        
+        return StoredData(trades, stock_prices, currencies)
+    
+    def save_to_sheets(self):
+        # Merge all data into one DataFrame
+        sheet = pd.concat([self.trades.reset_index(), pd.DataFrame(columns=['S.Spacer']), self.stocks.reset_index(), pd.DataFrame(columns=['C.Spacer']), self.currencies.reset_index()], axis=1)
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn.update(data=sheet, worksheet='Honzik')
+    
+    def update_trades(self, trades):
+        self.save_to_sheets()
+
+
+class Investments:
+    def __init__(self, stored_data : StoredData):
+        self.stored_data = stored_data
+        self.assets = None
+        self.stocks = stored_data.stocks.copy()
+        self.currencies = stored_data.currencies.copy()
+        self._trades = stored_data.trades.copy()
         
     def hash_func(obj):
         return hash( hash(obj.stocks.to_string()) + hash(obj.currencies.to_string()) + hash(obj._trades.to_string()))
     
     def get_trades(self):
-        return self._trades.copy()
+        return self._trades
     
     def get_assets(self):
         if self.assets is not None:
@@ -40,8 +81,7 @@ class InvestData:
         self.buy(asset, -amount, currency)
     
     def save(self):
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        conn.update(data=self._trades, worksheet='Trades')
+        self.stored_data.update_trades(self._trades)
 
 def get_investments():
     if 'data' not in st.session_state:
@@ -51,28 +91,7 @@ def get_investments():
 def load_investments():
     text = 'Načítám data o investicích...'
     progress = st.progress(0, text=text)
-    
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    progress.progress(0.2, text=text)
-
-    assets = conn.read(worksheet='Overview')
-    assets = assets.iloc[:, :2].set_index('Asset').dropna()
-    progress.progress(0.4, text=text)
-
-    stock_prices = conn.read(worksheet='Stocks')
-    stock_prices = stock_prices.iloc[:, :3].set_index('Ticker').dropna()
-    progress.progress(0.6, text=text)
-    
-    currencies = conn.read(worksheet='Currencies')
-    currencies = currencies.iloc[:, :4].set_index('FromTo').dropna()
-    progress.progress(0.8, text=text)
-    
-    trades = conn.read(worksheet='Trades')
-    trades = trades.iloc[:, :6].dropna()
-    trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
-    progress.progress(1.0, text='Hotovo')
-    progress.empty()
-    
-    return InvestData(assets, stock_prices, currencies, trades)
+    persister = StoredData.load_from_sheets(progress, text)    
+    return Investments(persister)
 
 
