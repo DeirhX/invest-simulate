@@ -8,7 +8,7 @@ credentials:
       email: deirh.mana@gmail.com
       failed_login_attempts: 0
       logged_in: false
-      name: The Deirh
+      name: Such Deirh
       password: $2b$12$oKieYHKmC71DO7PvLA4ig.o1troQOuRRTKKFVfatKnhdymNhhq/yq
     honzik:
       email: deirh.mana@gmail.com
@@ -17,11 +17,17 @@ credentials:
       name: "Honz\xC3\xADk Dobi\xC3\xA1\xC5\xA1"
       password: $2b$12$AybgipjOYUqiL0oClPf/VeJqQY0vPMArCFkbUdb5akTig0n6b.dkC
     zofierypa:
-      email: rbriggs@gmail.com
+      email: none@gmail.com
       failed_login_attempts: 0
       logged_in: false
-      name: Rebecca Briggs
-      password: $2b$12$SgIIY56Cid0UrXqLixEL8eg6QJKWPdyM0qPsxlTOuRiRQeQ5Zycbq
+      name: Beze jmena
+      password: simulator
+    hugorypa:
+      email: none@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Beze jmena
+      password: simulator
 pre-authorized:
   emails:
   - melsby@gmail.com
