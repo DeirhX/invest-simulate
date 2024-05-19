@@ -1,12 +1,14 @@
 import streamlit as st
 import compute
-import data
+import auth
+import ux
 from menu import menu
 from data import get_investments
-import ux
+
 st.set_page_config(page_title='Nákup akcií', layout='centered')
 st.subheader('Nákup / prodej akcií')
 menu() 
+auth.need_login()
 
 investments = st.session_state.get('data', None) or get_investments()
 st.session_state.data = investments

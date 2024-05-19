@@ -1,0 +1,25 @@
+credentials:
+  usernames:
+    jandobias:
+      email: deirh.mana@gmail.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: Honzík Dobiáš
+      password: epicwin # To be replaced with hashed password
+    deirh:
+      email: deirh.mana@gmail.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: The Deirh
+      password: epicwin # To be replaced with hashed password
+    zofierypa:
+      email: rbriggs@gmail.com
+      name: Rebecca Briggs
+      password: def # To be replaced with hashed password
+cookie:
+  expiry_days: 30
+  key: taxlite_login_key # Must be string
+  name: taxlite_login_cookie 
+pre-authorized:
+  emails:
+  - melsby@gmail.com

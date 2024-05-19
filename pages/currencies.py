@@ -3,10 +3,12 @@ import streamlit as st
 from menu import menu
 from data import get_investments
 import ux
+import auth
 
 st.set_page_config(page_title='Kurzy měn', layout='centered')
 st.subheader('Správa měn')
 menu() 
+auth.need_login()
 
 investments = st.session_state.get('data', None) or get_investments()
 st.session_state.data = investments
@@ -60,6 +62,6 @@ with st.container():
     st.markdown('Aktuální kurzy měn')
     st.dataframe(investments.currencies.sort_values(by='From'), hide_index=True, width=350,
                 column_order=['From', 'Price', 'To'], 
-                column_config={'From': st.column_config.TextColumn("Za"),
-                                'To': st.column_config.TextColumn("Čeho"),
-                                'Price': st.column_config.NumberColumn("Dostanu", format="%.3f")})
+                column_config={'From': st.column_config.TextColumn("Chci"),
+                                'Price': st.column_config.NumberColumn("Cena", format="%.3f"),
+                                'To': st.column_config.TextColumn("Měna"),})
