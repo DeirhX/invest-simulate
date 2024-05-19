@@ -7,11 +7,16 @@ st.title('Přihlášení')
 
 menu()
 
-authicate = auth.authenticator()
-logged_user = auth.status()
+authicate = auth.state.widget
+logged_user = auth.state.logged_user()
 if logged_user is not None:
     st.write(f'Přihlášen jako: {logged_user}')
-    authicate.logout()
+    col1, col2, spacer = st.columns([1, 1, 3.5])
+    with col1:
+        if st.button('Změnit heslo'):
+            st.switch_page('pages/password_change.py')
+    with col2:
+        authicate.logout('Odhlásit se')
 else:
     authicate.login()
     if st.session_state["authentication_status"]:

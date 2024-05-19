@@ -1,25 +1,27 @@
-credentials:
-  usernames:
-    jandobias:
-      email: deirh.mana@gmail.com
-      failed_login_attempts: 0 # Will be managed automatically
-      logged_in: False # Will be managed automatically
-      name: Honzík Dobiáš
-      password: epicwin # To be replaced with hashed password
-    deirh:
-      email: deirh.mana@gmail.com
-      failed_login_attempts: 0 # Will be managed automatically
-      logged_in: False # Will be managed automatically
-      name: The Deirh
-      password: epicwin # To be replaced with hashed password
-    zofierypa:
-      email: rbriggs@gmail.com
-      name: Rebecca Briggs
-      password: def # To be replaced with hashed password
 cookie:
   expiry_days: 30
-  key: taxlite_login_key # Must be string
-  name: taxlite_login_cookie 
+  key: taxlite_login_key
+  name: taxlite_login_cookie
+credentials:
+  usernames:
+    deirh:
+      email: deirh.mana@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: The Deirh
+      password: $2b$12$oKieYHKmC71DO7PvLA4ig.o1troQOuRRTKKFVfatKnhdymNhhq/yq
+    honzik:
+      email: deirh.mana@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: "Honz\xC3\xADk Dobi\xC3\xA1\xC5\xA1"
+      password: $2b$12$AybgipjOYUqiL0oClPf/VeJqQY0vPMArCFkbUdb5akTig0n6b.dkC
+    zofierypa:
+      email: rbriggs@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Rebecca Briggs
+      password: $2b$12$SgIIY56Cid0UrXqLixEL8eg6QJKWPdyM0qPsxlTOuRiRQeQ5Zycbq
 pre-authorized:
   emails:
   - melsby@gmail.com

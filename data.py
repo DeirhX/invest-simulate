@@ -9,8 +9,12 @@ class StoredData:
         self.currencies = currencies
         
     @staticmethod
+    def get_connection():
+        return st.connection(st.session_state['username'], type=GSheetsConnection)
+    
+    @staticmethod
     def load_from_sheets(progress, text):
-        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn = StoredData.get_connection()
         progress.progress(0.2, text=text)
 
         stock_prices = conn.read(worksheet='Stocks')
@@ -31,14 +35,14 @@ class StoredData:
     
     @staticmethod
     def load_trades():
-        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn = StoredData.get_connection()
         trades = conn.read(worksheet='Trades')
         trades = trades.iloc[:, :6].dropna()
         trades['Time'] = pd.to_datetime(trades['Time'], dayfirst=True)
         return trades
     
     def add_trade(self, trade):
-        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn = StoredData.get_connection()
         st.cache_data.clear()
         prev_trades = StoredData.load_trades()
         # Merge trades with current trades, keeping all unique rows
