@@ -30,10 +30,12 @@ if logged_user is not None:
             st.error(e.message)
 else:
     authicate.login()
-    if st.session_state["authentication_status"]:
+    status = st.session_state.get("authentication_status", None)
+    if status is None:
+        st.warning('Zadejte své uživatelské jméno a heslo')
+    elif status is False:
+        st.error('Login/heslo nejsou správné')
+    else:
         st.write(f'Přihlášen jako *{st.session_state["name"]}*')
         authicate.logout()
-    elif st.session_state["authentication_status"] is False:
-        st.error('Login/heslo nejsou správné')
-    elif st.session_state["authentication_status"] is None:
-        st.warning('Zadejte své uživatelské jméno a heslo')
+    
