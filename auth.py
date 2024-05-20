@@ -28,9 +28,7 @@ class Authenticator():
         with open(Authenticator.SECRETS_FILE, 'w') as file:
             yaml.dump(self.config, file, default_flow_style=False)
             
-state = Authenticator()
-
 def need_login():
-    if not state.logged_user():
+    if not Authenticator().logged_user():
         st.switch_page('pages/login.py')
 
